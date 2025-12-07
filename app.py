@@ -33,10 +33,14 @@ def load_user(user_id):
 # Initialize database
 init_db(app)
 
+from streaming_service import streaming_service
+
 class StreamManager:
     def __init__(self):
-        self.processes = {}  # {channel_id: process}
-        self.running_channels = {}  # {channel_id: session_id}
+        # Use new streaming service
+        self.streaming_service = streaming_service
+        self.processes = {}  # Kept for compatibility
+        self.running_channels = {}  # Kept for compatibility
         self.log_messages = []
         
     # Config methods removed - all configuration now in database
@@ -86,6 +90,18 @@ class StreamManager:
             return current_time >= start or current_time <= end
     
     def start_stream(self, channel_id):
+        # Use new streaming service with auto-retry
+        success, message = self.streaming_service.start_stream(channel_id)
+        
+        # Update compatibility attributes
+        if success:
+            self.running_channels = dict(self.streaming_service.running_channels)
+            self.processes = dict(self.streaming_service.active_streams)
+        
+        return success, message
+    
+    def start_stream_old(self, channel_id):
+        # Old implementation (kept as backup)
         channel = StreamChannel.query.get(channel_id)
         if not channel:
             return False, "Channel tidak ditemukan"
@@ -169,6 +185,17 @@ class StreamManager:
             return False, str(e)
     
     def stop_stream(self, channel_id):
+        # Use new streaming service
+        success, message = self.streaming_service.stop_stream(channel_id)
+        
+        # Update compatibility attributes
+        self.running_channels = dict(self.streaming_service.running_channels)
+        self.processes = dict(self.streaming_service.active_streams)
+        
+        return success, message
+    
+    def stop_stream_old(self, channel_id):
+        # Old implementation (kept as backup)
         if channel_id not in self.running_channels:
             return False, "Stream tidak berjalan"
         

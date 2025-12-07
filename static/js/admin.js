@@ -35,27 +35,33 @@ const AppState = {
     },
     
     startAutoUpdates() {
-        // Update dashboard stats every 5 seconds
+        // Update dashboard stats every 10 seconds (reduced from 5)
         this.updateIntervals.stats = setInterval(() => {
             if (this.currentSection === 'dashboard') {
                 DashboardModule.updateStats();
             }
-        }, 5000);
+        }, 10000);
         
-        // Update channels every 3 seconds
+        // Update channels every 10 seconds (reduced from 3)
         this.updateIntervals.channels = setInterval(() => {
-            ChannelsModule.updateChannels();
-        }, 3000);
+            if (this.currentSection === 'channels') {
+                ChannelsModule.updateChannels();
+            }
+        }, 10000);
         
-        // Update videos every 5 seconds
+        // Update videos every 30 seconds (reduced from 5)
         this.updateIntervals.videos = setInterval(() => {
-            VideosModule.updateVideos();
-        }, 5000);
+            if (this.currentSection === 'videos') {
+                VideosModule.updateVideos();
+            }
+        }, 30000);
         
-        // Update logs every 3 seconds
+        // Update logs every 10 seconds (reduced from 3)
         this.updateIntervals.logs = setInterval(() => {
-            LogsModule.updateLogs();
-        }, 3000);
+            if (this.currentSection === 'logs') {
+                LogsModule.updateLogs();
+            }
+        }, 10000);
     },
     
     showSection(section) {
