@@ -110,6 +110,7 @@ class StreamingService:
             
             if poll is not None:
                 # Process ended
+                print(f"[StreamingService] Stream {channel_id} ended with code {poll}")
                 self.add_stream_log(channel_id, f"Stream ended with code {poll}", 'WARNING')
                 
                 # Check if manually stopped

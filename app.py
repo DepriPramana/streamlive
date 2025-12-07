@@ -261,6 +261,10 @@ class StreamManager:
             print(f"Error updating stats: {e}")
     
     def get_status(self):
+        # Sync with streaming service
+        self.running_channels = dict(self.streaming_service.running_channels)
+        self.processes = dict(self.streaming_service.active_streams)
+        
         channels = StreamChannel.query.filter_by(enabled=True).all()
         channel_statuses = []
         
@@ -270,10 +274,13 @@ class StreamManager:
             if video_exists:
                 video_size = os.path.getsize(channel.video_path) / (1024 * 1024)
             
+            # Check if really running (double check)
+            is_running = self.streaming_service.is_stream_active(channel.id)
+            
             channel_statuses.append({
                 "id": channel.id,
                 "name": channel.name,
-                "running": channel.id in self.running_channels,
+                "running": is_running,
                 "video_exists": video_exists,
                 "video_size_mb": round(video_size, 2),
                 "is_streaming_time": self.is_streaming_time(channel),
@@ -283,7 +290,7 @@ class StreamManager:
         
         return {
             "channels": channel_statuses,
-            "total_running": len(self.running_channels),
+            "total_running": len(self.streaming_service.active_streams),
             "total_channels": len(channels)
         }
 
