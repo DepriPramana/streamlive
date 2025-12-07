@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StreamLive Admin Dashboard - Professional YouTube Live Streaming Management">
+    <meta name="author" content="StreamLive Team">
+    <title>StreamLive - Admin Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>🎥 StreamLive</h2>
+            <p>Admin Dashboard</p>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#" class="menu-item active" data-section="dashboard" onclick="AppState.showSection('dashboard'); return false;">
+                <i>📊</i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="menu-item" data-section="channels" onclick="AppState.showSection('channels'); return false;">
+                <i>📺</i>
+                <span>Channels</span>
+            </a>
+            <a href="#" class="menu-item" data-section="videos" onclick="AppState.showSection('videos'); return false;">
+                <i>🎬</i>
+                <span>Video Library</span>
+            </a>
+            <a href="#" class="menu-item" data-section="logs" onclick="AppState.showSection('logs'); return false;">
+                <i>📝</i>
+                <span>System Logs</span>
+            </a>
+            <a href="#" class="menu-item" data-section="stats" onclick="AppState.showSection('stats'); return false;">
+                <i>📈</i>
+                <span>Statistics</span>
+            </a>
+            <a href="#" class="menu-item" data-section="playlists" onclick="AppState.showSection('playlists'); return false;">
+                <i>🎵</i>
+                <span>Playlists</span>
+            </a>
+            <a href="#" class="menu-item" data-section="scheduler" onclick="AppState.showSection('scheduler'); return false;">
+                <i>⏰</i>
+                <span>Scheduler</span>
+            </a>
+            <a href="#" class="menu-item" data-section="platforms" onclick="AppState.showSection('platforms'); return false;">
+                <i>📡</i>
+                <span>Platforms</span>
+            </a>
+            <a href="#" class="menu-item" data-section="analytics" onclick="AppState.showSection('analytics'); return false;">
+                <i>📊</i>
+                <span>Analytics</span>
+            </a>
+            {% if user.is_admin %}
+            <a href="#" class="menu-item" data-section="users" onclick="AppState.showSection('users'); return false;">
+                <i>👥</i>
+                <span>Users</span>
+            </a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <!-- Top Bar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <h1 id="page-title">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <span class="user-name">{{ user.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; text-decoration: none;">
+                    🚪 Logout
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="content-section active">
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-icon">📺</div>
+                    <div class="stat-value" id="stat-channels">0</div>
+                    <div class="stat-label">Total Channels</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-icon">▶️</div>
+                    <div class="stat-value" id="stat-running">0</div>
+                    <div class="stat-label">Running Streams</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">🎬</div>
+                    <div class="stat-value" id="stat-videos">0</div>
+                    <div class="stat-label">Total Videos</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value" id="stat-sessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-value" id="stat-duration">0h</div>
+                    <div class="stat-label">Total Duration</div>
+                </div>
+                <div class="stat-card teal">
+                    <div class="stat-icon">💾</div>
+                    <div class="stat-value" id="stat-storage">0GB</div>
+                    <div class="stat-label">Storage Used</div>
+                </div>
+            </div>
+            
+            <!-- System Metrics -->
+            <div class="card">
+                <h2>🖥️ System Metrics</h2>
+                <div class="system-metrics">
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <span class="metric-label">💻 CPU Usage</span>
+                            <span class="metric-value" id="system-cpu">0%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div id="cpu-progress" class="progress-bar progress-success" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <span class="metric-label">🧠 Memory Usage</span>
+                            <span class="metric-value">
+                                <span id="system-memory">0%</span>
+                                <small id="system-memory-detail" style="color: #7f8c8d; font-size: 0.85em; margin-left: 8px;">0GB / 0GB</small>
+                            </span>
+                        </div>
+                        <div class="progress-container">
+                            <div id="memory-progress" class="progress-bar progress-success" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-header">
+                            <span class="metric-label">💿 Disk Usage</span>
+                            <span class="metric-value">
+                                <span id="system-disk">0%</span>
+                                <small id="system-disk-detail" style="color: #7f8c8d; font-size: 0.85em; margin-left: 8px;">0GB / 0GB</small>
+                            </span>
+                        </div>
+                        <div class="progress-container">
+                            <div id="disk-progress" class="progress-bar progress-success" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Channels Section -->
+        <section id="section-channels" class="content-section">
+            <div class="card">
+                <h2>📺 Channels Management</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="ChannelsModule.showAddModal()">
+                        ➕ Add New Channel
+                    </button>
+                    <button class="btn btn-danger" onclick="ChannelsModule.stopAll()">
+                        ⏹️ Stop All Streams
+                    </button>
+                </div>
+                <div id="channels-container">
+                    <div class="info-row">Loading channels...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Videos Section -->
+        <section id="section-videos" class="content-section">
+            <div class="card">
+                <h2>🎬 Video Library</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="VideosModule.showUploadModal()">
+                        📤 Upload Video
+                    </button>
+                    <button class="btn btn-warning" onclick="VideosModule.showDownloadModal()">
+                        ⬇️ Download from GDrive
+                    </button>
+                    <button class="btn btn-secondary" onclick="VideosModule.scanLocal()">
+                        🔍 Scan Folder
+                    </button>
+                </div>
+                <div id="videos-container" style="max-height: 500px; overflow-y: auto;">
+                    <div class="info-row">Loading videos...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Logs Section -->
+        <section id="section-logs" class="content-section">
+            <div class="card">
+                <h2>📝 System Logs</h2>
+                <div class="log-container" id="log-container">
+                    <div class="log-entry">Waiting for activity...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section id="section-stats" class="content-section">
+            <div class="card">
+                <h2>📊 Statistics Overview</h2>
+                <div class="info-row">
+                    <span class="info-label">Total Sessions:</span>
+                    <span class="info-value" id="total-sessions">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Total Duration:</span>
+                    <span class="info-value" id="total-duration">0h 0m</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>📜 Recent History</h2>
+                <div id="history-container" style="max-height: 400px; overflow-y: auto;">
+                    <div class="info-row">Loading history...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Playlists Section -->
+        <section id="section-playlists" class="content-section">
+            <div class="card">
+                <h2>🎵 Video Playlists</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="PlaylistsModule.showAddModal()">
+                        ➕ Create Playlist
+                    </button>
+                </div>
+                <div id="playlists-container">
+                    <div class="info-row">Loading playlists...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scheduler Section -->
+        <section id="section-scheduler" class="content-section">
+            <div class="card">
+                <h2>⏰ Automated Scheduler</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="SchedulerModule.showAddModal()">
+                        ➕ Add Scheduled Task
+                    </button>
+                </div>
+                <div id="scheduler-container">
+                    <div class="info-row">Loading scheduled tasks...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Platforms Section -->
+        <section id="section-platforms" class="content-section">
+            <div class="card">
+                <h2>📡 Multi-Platform Streaming</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="PlatformsModule.showAddModal()">
+                        ➕ Add Platform Destination
+                    </button>
+                </div>
+                <div id="platforms-container">
+                    <div class="info-row">Loading platforms...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="section-analytics" class="content-section">
+            <div class="card">
+                <h2>📊 Advanced Analytics</h2>
+                <div class="mb-3">
+                    <select id="analytics-channel-select" class="form-control" style="display: inline-block; width: 200px; margin-right: 10px;">
+                        <option value="">All Channels</option>
+                    </select>
+                    <select id="analytics-days-select" class="form-control" style="display: inline-block; width: 150px; margin-right: 10px;">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 90 Days</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="AnalyticsModule.loadAnalytics()">
+                        🔄 Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="AnalyticsModule.exportReport()">
+                        📥 Export
+                    </button>
+                </div>
+                
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card blue">
+                        <div class="stat-icon">📺</div>
+                        <div class="stat-value" id="analytics-total-sessions">0</div>
+                        <div class="stat-label">Total Sessions</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="analytics-success-rate">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value" id="analytics-uptime">0%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-value" id="analytics-avg-duration">0h</div>
+                        <div class="stat-label">Avg Duration</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3>📈 Peak Hours</h3>
+                    <div id="peak-hours-container">
+                        <div class="info-row">Loading peak hours...</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎬 Video Performance</h3>
+                    <div id="video-performance-container">
+                        <div class="info-row">Loading video performance...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Section (Admin Only) -->
+        {% if user.is_admin %}
+        <section id="section-users" class="content-section">
+            <div class="card">
+                <h2>👥 User Management</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="UsersModule.showAddModal()">
+                        ➕ Add New User
+                    </button>
+                </div>
+                <div id="users-container">
+                    <div class="info-row">Loading users...</div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+    </main>
+
+    <!-- Add Channel Modal -->
+    <div id="add-channel-modal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Add New Channel</h2>
+            <form id="add-channel-form" onsubmit="ChannelsModule.addChannel(event)">
+                <div class="form-group">
+                    <label>Channel Name:</label>
+                    <input type="text" id="new_channel_name" required>
+                </div>
+                <div class="form-group">
+                    <label>YouTube Stream Key:</label>
+                    <input type="password" id="new_stream_key" required>
+                </div>
+                <div class="form-group">
+                    <label>Select Video:</label>
+                    <select id="new_video_id" onchange="VideosModule.selectVideo()" required>
+                        <option value="">-- Select from Video Library --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Video Path:</label>
+                    <input type="text" id="new_video_path" readonly style="background: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label>Campaign Start Date (Optional):</label>
+                    <input type="date" id="new_start_date">
+                    <small>Leave empty to start now</small>
+                </div>
+                <div class="form-group">
+                    <label>Campaign End Date (Optional):</label>
+                    <input type="date" id="new_end_date">
+                    <small>Leave empty for no end date</small>
+                </div>
+                <div class="form-group">
+                    <label>Daily Start Time:</label>
+                    <input type="time" id="new_start_time" value="08:00" required>
+                </div>
+                <div class="form-group">
+                    <label>Daily End Time:</label>
+                    <input type="time" id="new_end_time" value="20:00" required>
+                </div>
+                <div class="form-group">
+                    <label>Timezone:</label>
+                    <select id="new_timezone">
+                        <option value="Asia/Jakarta">WIB (Jakarta)</option>
+                        <option value="Asia/Makassar">WITA (Makassar)</option>
+                        <option value="Asia/Jayapura">WIT (Jayapura)</option>
+                    </select>
+                </div>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #f3f4f6; border-radius: 10px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="show_advanced" onchange="ChannelsModule.toggleAdvanced()" style="margin-right: 10px;">
+                        <strong>⚙️ Advanced Settings (Optional)</strong>
+                    </label>
+                    <small>Default: Stream using original video quality without re-encoding</small>
+                </div>
+                
+                <div id="advanced_settings" style="display: none;">
+                    <div class="form-group">
+                        <label>Encoding Mode:</label>
+                        <select id="new_encoding_mode" onchange="ChannelsModule.toggleEncodingOptions()">
+                            <option value="copy" selected>Copy (Use original video - Recommended)</option>
+                            <option value="encode">Re-encode (Custom bitrate & FPS)</option>
+                        </select>
+                        <small>Copy = Fast & low CPU. Re-encode = Custom quality but needs more CPU</small>
+                    </div>
+                    
+                    <div id="encoding_options" style="display: none;">
+                        <div class="form-group">
+                            <label>Bitrate:</label>
+                            <input type="text" id="new_bitrate" value="4000k" placeholder="4000k">
+                            <small>Example: 2500k (720p), 4000k (1080p), 6000k (1080p60)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>FPS (Frame Per Second):</label>
+                            <input type="number" id="new_fps" value="30" min="24" max="60">
+                        </div>
+                        <div class="form-group">
+                            <label>Preset:</label>
+                            <select id="new_preset">
+                                <option value="ultrafast">Ultrafast (Low CPU, low quality)</option>
+                                <option value="veryfast" selected>Veryfast (Balanced)</option>
+                                <option value="fast">Fast (Medium CPU, good quality)</option>
+                                <option value="medium">Medium (High CPU, best quality)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">💾 Save</button>
+                <button type="button" class="btn btn-secondary" onclick="ChannelsModule.hideAddModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Video Modal -->
+    <div id="upload-video-modal" class="modal">
+        <div class="modal-content">
+            <h2>📤 Upload Video</h2>
+            <form id="upload-video-form" onsubmit="VideosModule.uploadVideo(event)">
+                <div class="form-group">
+                    <label>Video Title:</label>
+                    <input type="text" id="upload_video_title" required>
+                </div>
+                <div class="form-group">
+                    <label>Select Video File:</label>
+                    <input type="file" id="upload_video_file" accept="video/*" required>
+                    <small>Format: MP4, MKV, AVI, MOV, etc. Max: 2GB</small>
+                </div>
+                <div id="upload-progress" style="display: none; margin: 15px 0;">
+                    <div style="background: #e5e7eb; border-radius: 10px; height: 30px; overflow: hidden;">
+                        <div id="upload-progress-bar" style="background: #10b981; height: 100%; width: 0%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            0%
+                        </div>
+                    </div>
+                    <small id="upload-status" style="color: #666; display: block; margin-top: 5px;">Preparing upload...</small>
+                </div>
+                <button type="submit" class="btn btn-primary" id="upload-btn">📤 Upload</button>
+                <button type="button" class="btn btn-secondary" onclick="VideosModule.hideUploadModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Download Video from GDrive Modal -->
+    <div id="download-video-modal" class="modal">
+        <div class="modal-content">
+            <h2>⬇️ Download from Google Drive</h2>
+            <form id="download-video-form" onsubmit="VideosModule.downloadFromGDrive(event)">
+                <div class="form-group">
+                    <label>Video Title:</label>
+                    <input type="text" id="gdrive_video_title" required>
+                </div>
+                <div class="form-group">
+                    <label>Filename (will be saved as):</label>
+                    <input type="text" id="gdrive_video_filename" placeholder="video.mp4" required>
+                </div>
+                <div class="form-group">
+                    <label>Google Drive File ID:</label>
+                    <input type="text" id="gdrive_video_id" required>
+                    <small>From link: drive.google.com/file/d/<strong>FILE_ID</strong>/view</small>
+                </div>
+                <button type="submit" class="btn btn-warning">⬇️ Download</button>
+                <button type="button" class="btn btn-secondary" onclick="VideosModule.hideDownloadModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="add-user-modal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Add New User</h2>
+            <form id="add-user-form" onsubmit="UsersModule.addUser(event)">
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="new_user_username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="new_user_password" required minlength="6">
+                    <small>Minimum 6 characters</small>
+                </div>
+                <div class="form-group">
+                    <label>Email (Optional):</label>
+                    <input type="email" id="new_user_email">
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="new_user_is_admin" style="margin-right: 10px;">
+                        <span>Admin User</span>
+                    </label>
+                    <small>Admin users can manage other users and have full access</small>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="new_user_is_active" checked style="margin-right: 10px;">
+                        <span>Active</span>
+                    </label>
+                    <small>Inactive users cannot login</small>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Create User</button>
+                <button type="button" class="btn btn-secondary" onclick="UsersModule.hideAddModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <h2>✏️ Edit User</h2>
+            <form id="edit-user-form" onsubmit="UsersModule.updateUser(event)">
+                <input type="hidden" id="edit_user_id">
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="edit_user_username" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password (leave empty to keep current):</label>
+                    <input type="password" id="edit_user_password" minlength="6">
+                    <small>Only fill if you want to change password</small>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="edit_user_email">
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="edit_user_is_admin" style="margin-right: 10px;">
+                        <span>Admin User</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="edit_user_is_active" style="margin-right: 10px;">
+                        <span>Active</span>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Update User</button>
+                <button type="button" class="btn btn-secondary" onclick="UsersModule.hideEditModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Playlist Modal -->
+    <div id="add-playlist-modal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Create Playlist</h2>
+            <form id="add-playlist-form" onsubmit="PlaylistsModule.addPlaylist(event)">
+                <div class="form-group">
+                    <label>Playlist Name:</label>
+                    <input type="text" id="new_playlist_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="new_playlist_description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Playback Mode:</label>
+                    <select id="new_playlist_mode">
+                        <option value="sequential">Sequential (Play in order)</option>
+                        <option value="shuffle">Shuffle (Random without repeat)</option>
+                        <option value="random">Random (Weighted selection)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Create</button>
+                <button type="button" class="btn btn-secondary" onclick="PlaylistsModule.hideAddModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Scheduled Task Modal -->
+    <div id="add-scheduler-modal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Add Scheduled Task</h2>
+            <form id="add-scheduler-form" onsubmit="SchedulerModule.addTask(event)">
+                <div class="form-group">
+                    <label>Channel:</label>
+                    <select id="new_task_channel" required>
+                        <option value="">-- Select Channel --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Task Type:</label>
+                    <select id="new_task_type" required>
+                        <option value="start">Start Stream</option>
+                        <option value="stop">Stop Stream</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Scheduled Time:</label>
+                    <input type="time" id="new_task_time" required>
+                </div>
+                <div class="form-group">
+                    <label>Days of Week:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="0" class="task-day" checked> Mon
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="1" class="task-day" checked> Tue
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="2" class="task-day" checked> Wed
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="3" class="task-day" checked> Thu
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="4" class="task-day" checked> Fri
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="5" class="task-day"> Sat
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" value="6" class="task-day"> Sun
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Create</button>
+                <button type="button" class="btn btn-secondary" onclick="SchedulerModule.hideAddModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Platform Modal -->
+    <div id="add-platform-modal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Add Platform Destination</h2>
+            <form id="add-platform-form" onsubmit="PlatformsModule.addPlatform(event)">
+                <div class="form-group">
+                    <label>Channel:</label>
+                    <select id="new_platform_channel" required>
+                        <option value="">-- Select Channel --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Platform:</label>
+                    <select id="new_platform_name" onchange="PlatformsModule.updateRTMPUrl()" required>
+                        <option value="">-- Select Platform --</option>
+                        <option value="youtube">YouTube Live</option>
+                        <option value="facebook">Facebook Live</option>
+                        <option value="twitch">Twitch</option>
+                        <option value="custom">Custom RTMP</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>RTMP URL:</label>
+                    <input type="text" id="new_platform_rtmp" required>
+                    <small>Will be auto-filled for known platforms</small>
+                </div>
+                <div class="form-group">
+                    <label>Stream Key:</label>
+                    <input type="password" id="new_platform_key" required>
+                </div>
+                <div class="form-group">
+                    <label>Priority (higher = starts first):</label>
+                    <input type="number" id="new_platform_priority" value="0" min="0">
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Add</button>
+                <button type="button" class="btn btn-secondary" onclick="PlatformsModule.hideAddModal()">❌ Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    
+</body>
+</html>
